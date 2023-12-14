@@ -27,6 +27,12 @@ public:
 		this->freq=left->freq+right->freq;
 		this->isLeaf=false;
 	}
+	~HuffNode(){
+		left=nullptr;
+		right=nullptr;
+		delete left;
+		delete right;
+	}
 	void printTree();
 	void printNode();
 	friend class Hufftree;
@@ -117,8 +123,11 @@ public:
 				temp->left=Rotate(temp->left,index);
 				//if(index==0)return temp;
 				temp->right=Rotate(temp->right,index);
+				/*Preorder*/
+
 				l=getHeightRec(temp->left);
 				r=getHeightRec(temp->right);
+				
 				if(l-r==1)temp->bf=-1;
 				else if(l-r==-1)temp->bf=1;
 				else temp->bf=0;
@@ -181,7 +190,7 @@ public:
 			/*Tạo 1 thằng mới có freq là tổng 2 thằng trên và chứa 2 thằng trên*/	
 			HuffNode* temp=new HuffNode(left.second,right.second);
 			temp=Rotate(temp,3);
-			/*push vào lại HuffTree*/
+			/*push vào lại Queue*/
 			dequeCompare.push({i,temp});
 			//printMinheap(dequeCompare);
 			//displayTreeVertical(temp,0);
@@ -190,6 +199,8 @@ public:
 		}	
 		/*set lại root*/
 		root=dequeCompare.top().second;
+		dequeCompare.pop();
+		//delete &dequeCompare;
     }
 	
 	void printMinheap(priority_queue<pair<int,HuffNode*>,vector<pair<int,HuffNode*>>,compare1> minHeap){
@@ -265,12 +276,14 @@ public:
 		}
 		return res;
 	}
+	
 	void detructor(HuffNode* node){
 		if(node==nullptr)return;
 		detructor(node->left);
 		detructor(node->right);
 		delete node;
 	}
+	
 	~Hufftree(){
 		detructor(root);
 	}
@@ -279,23 +292,22 @@ public:
 
 struct Customer
 {
-
 	string name;
 	int result;
-	vector<pair<char,int>> saving;
-	unordered_map<char,string> code;
+	// vector<pair<char,int>> saving;
+	// unordered_map<char,string> code;
 	Customer(){
 	}
 	void printCustomer(){
 		cout<<result<<endl;
 	}
-	string convertName(Customer*A){
+	string convertName(Customer*A,unordered_map<char,string> code){
 		string res="";
 		string name=A->name;
-		for(int i=0;i<name.length();i++){
+		for(size_t i=0;i<name.length();i++){
 			char c=name[i];
-			//cout<<c<<" "<<A->code[c]<<endl;
-			res+=A->code[c];
+			//cout<<c<<" "<<code[c]<<endl;
+			res+=code[c];
 		}
 		return res;
 	}
@@ -319,6 +331,10 @@ struct Customer
 		//cout<<decimal<<endl;
 		return decimal;
 	}
+	// ~Customer(){
+	// 	saving.clear();
+	// 	code.clear();
+	// }	
 };
 /*DONE SORT*/
 bool compare(pair<char, int>& a, pair<char, int>& b) {
@@ -336,10 +352,37 @@ bool compare(pair<char, int>& a, pair<char, int>& b) {
 	}
 }
 
-string sortFrequent(Customer *A, unordered_map<char,int>& map){
+// string sortFrequent(Customer *A, unordered_map<char,int>& map){
+// 	string E=A->name;
+// 	for(int i=E.length()-1;i>=0;i--){
+// 		char c=E[i];
+// 		map[c]++;
+// 	}
+
+// 	vector<pair<char,int>> temp;
+
+// 	for( auto x: map){
+// 		temp.push_back({x.first,x.second});
+// 	}
+	
+// 	sort(temp.begin(),temp.end(),compare);
+	
+// 	string temp2="";
+    
+// 	for (auto x : temp) {
+//         for (int i = 0; i < x.second; i++) {
+//             temp2 += x.first;
+//         }
+//     }
+// 	A->saving.clear();
+// 	A->saving=temp;
+// 	temp.clear();
+// 	if(map.size()<3)return "false";
+// 	return temp2;
+// }
+
+string sortFrequent2(Customer*A,unordered_map<char,int>& map, vector<pair<char,int>>& saving){
 	string E=A->name;
-
-
 	for(int i=E.length()-1;i>=0;i--){
 		char c=E[i];
 		map[c]++;
@@ -360,11 +403,11 @@ string sortFrequent(Customer *A, unordered_map<char,int>& map){
             temp2 += x.first;
         }
     }
-	A->saving=temp;
+	saving=temp;
+	temp.clear();
 	if(map.size()<3)return "false";
 	return temp2;
 }
-
 /*---------------------------------------------*/
 
 /*BINARY TREE*/
@@ -413,9 +456,9 @@ int countWays(vector<int>& arr, int fact[])
         }
     }
  
-    int N1 = left.size();
+    size_t N1 = left.size();
  
-    int N2 = right.size();
+    //size_t N2 = right.size();
  
     int countLeft
         = countWays(left,
@@ -437,8 +480,10 @@ private:
 public:
     BinarySearchTree() : root(nullptr) {}
     ~BinarySearchTree()
-    {
-        
+    {	
+		while (root != nullptr) {
+			deleteNode(root->value);
+		}
     }
     /*Insert*/
     void addhelp(Node*&root, Customer* value, Node*insert){
@@ -523,6 +568,7 @@ public:
         }
     }
     
+	
     /*printInorder*/
     void inOrder(Node* root) {
         if (root != nullptr) {
@@ -568,7 +614,6 @@ public:
         friend class BinarySearchTree;
     public:
         Node(Customer* value) : value(value), pLeft(NULL), pRight(NULL) {}
-        ~Node() {}
     };
 };
 
@@ -577,7 +622,7 @@ public:
 /*SUKUNA*/
 /*Node Sukuna*/
 struct nodeSukuna{
-    int count=0;
+    //int count=0;
 	int ID;
 	nodeSukuna* left=nullptr;
 	nodeSukuna* right=nullptr;
@@ -586,10 +631,17 @@ struct nodeSukuna{
 	nodeSukuna* insert(Customer* customerAdd);
 	void printLifo(int NUM,int ID);
 	void remove();
+	~nodeSukuna(){
+		while(!rootDeque.empty()){
+			Customer* temp=rootDeque.front();
+			rootDeque.pop_front();
+			delete temp;
+		}
+	}
 };
 /*In theo Lifo- Lenh CLEAVE*/
 void nodeSukuna::printLifo(int NUM,int ID){
-	if(rootDeque.size()<NUM){
+	if(int(rootDeque.size())<NUM){
 		NUM=rootDeque.size();
 	}
 	for(int i=0;i<NUM;i++){
@@ -600,16 +652,17 @@ void nodeSukuna::printLifo(int NUM,int ID){
 nodeSukuna *nodeSukuna::insert(Customer *customerAdd)
 {	
     
-	this->count++;
+	//this->count++;
 	rootDeque.push_back(customerAdd);
 	return this;
 }
 /*Xoa theo FIFO va print*/
 void nodeSukuna::remove()
-{
+{	Customer* temp=rootDeque.front();
 	cout<<rootDeque.front()->result<<"-"<<ID<<endl;
-	count--;
+	//count--;
 	rootDeque.pop_front();
+	delete temp;
 }
 
 
@@ -630,11 +683,31 @@ class sukunaRes
 		int sreachIndex(nodeSukuna* node);
 		void sukunaDelete(int NUM);
 		void printPreorder(int& NUM,int index);
-		void reHeapUp(int index);
-		void reHeapDown(int index);
+		void reHeapUp(int& index);
+		void reHeapDown(int& index);
 		void heapify();
 		bool compare(nodeSukuna* node1,nodeSukuna* node2);
 		void selectSort(vector<nodeSukuna*> &IDdelete,int NUM,int left, int right);
+		void printTreeMinHeap(int index, int indent = 0) {
+			if (index < int(vectorSukuna.size())) {
+				printTreeMinHeap(2 * index + 2, indent + 4);  // right child
+
+				if (indent) {
+					std::cout << std::setw(indent) << ' ';
+				}
+
+				if (2 * index + 2 < int(vectorSukuna.size())) {
+					std::cout << "/\n" << std::setw(indent) << ' ';
+				}
+
+				std::cout << vectorSukuna[index]->ID << "-" << vectorSukuna[index]->rootDeque.size() << "\n ";
+
+				if (2 * index + 1 <int( vectorSukuna.size())) {
+					std::cout << std::setw(indent) << ' ' << "\\\n";
+					printTreeMinHeap(2 * index + 1, indent + 4);  // left child
+				}
+			}
+		}
 		~sukunaRes();
 };
 
@@ -649,24 +722,28 @@ void sukunaRes::insert(Customer *customerAdd)
 				nodeSukuna* newNode= new nodeSukuna(ID);
 				newNode->insert(customerAdd);
 				vectorSukuna.push_back(newNode);
-				reHeapUp(vectorSukuna.size()-1);
+				int index=vectorSukuna.size()-1;
 				LRU.push_back(ID);
+				reHeapUp(index);
 			}
 			else{
 				temp->insert(customerAdd);
-				for(int i=0;i<LRU.size();i++){
+				for(int i=0;i<int(LRU.size());i++){
 					if(LRU[i]==ID){
 						LRU.erase(LRU.begin()+i);
 						break;
 					}
 				}
+				int tr=sreachIndex(temp);
 				LRU.push_back(ID);
+				reHeapDown(tr);
+				reHeapUp(tr);
 			}
 }
 
 nodeSukuna *sukunaRes::sreach(int ID)
 {
-	for(int i=0;i<vectorSukuna.size();i++){
+	for(size_t i=0;i<vectorSukuna.size();i++){
 		if(vectorSukuna[i]->ID==ID){
 			return vectorSukuna[i];
 		}
@@ -676,7 +753,7 @@ nodeSukuna *sukunaRes::sreach(int ID)
 
 int sukunaRes::sreachIndex(nodeSukuna *node)
 {
-	for(int i=0;i<vectorSukuna.size();i++){
+	for(size_t i=0;i<vectorSukuna.size();i++){
 		if(vectorSukuna[i]==node){
 			return i;
 		}
@@ -685,29 +762,39 @@ int sukunaRes::sreachIndex(nodeSukuna *node)
 }
 void sukunaRes::sukunaDelete(int NUM)
 {	
-	vector<nodeSukuna*> IDdelete;
-    if(vectorSukuna.size()==0)return;
-	IDdelete.push_back(vectorSukuna[0]);
-	selectSort(IDdelete,NUM-1,1,2);
+	list<nodeSukuna*> IDdelete;
+	for(size_t i=0;i<vectorSukuna.size();i++){
+		IDdelete.push_back(vectorSukuna[i]);
+	}
+	IDdelete.sort([this](nodeSukuna*a,nodeSukuna*b){
+		return compare(a,b);}
+	);
+	int Num2=NUM;
+	if(NUM>int(IDdelete.size())){
+		NUM=IDdelete.size();
+	}
 	//cout<<"IDdelete\n";
-	for(int i=0;i<IDdelete.size();i++){
+	for(int i=0;i<NUM;i++){
 		//cout<<"STEP"<<i<<endl;
-		for(int k=0;k<LRU.size();k++){
-			if(LRU[k]==IDdelete[i]->ID){
+		//printTreeMinHeap(0);
+
+		for(size_t k=0;k<LRU.size();k++){
+			if(LRU[k]==IDdelete.front()->ID){
 				LRU.erase(LRU.begin()+k);
 				break;
 			}
 		}
-		LRU.push_back(IDdelete[i]->ID);
-		int index=sreachIndex(IDdelete[i]);
-		for(int j=0;j<NUM;j++){
-			IDdelete[i]->remove();
-			if(IDdelete[i]->count==0)break;
+		LRU.push_back(IDdelete.front()->ID);
+		int index=sreachIndex(IDdelete.front());
+		for(int j=0;j<Num2;j++){
+			IDdelete.front()->remove();
+			if(IDdelete.front()->rootDeque.size()==0)break;
 		}
 		//cout<<"reHeap\n";
 		reHeapUp(index);
+		reHeapDown(index);
 		//cout<<"index"<<index<<endl;
-		if(IDdelete[i]->count==0){
+		if(IDdelete.front()->rootDeque.size()==0){
 			//cout<<"delete\n";
 			LRU.pop_back();
 			swap(vectorSukuna[index],vectorSukuna[vectorSukuna.size()-1]);
@@ -717,57 +804,70 @@ void sukunaRes::sukunaDelete(int NUM)
 			//cout<<"index"<<index<<endl;
 			//cout<<"delete\n";
 			reHeapDown(index);
+			nodeSukuna* temp=IDdelete.front();
+			delete temp;
 			//cout<<"delete\n";
 		}
+		IDdelete.pop_front();
 	}
 	//cout<<"OK\n";	
 	IDdelete.clear();
 }
 
-void sukunaRes::selectSort(vector<nodeSukuna*> &IDdelete,int NUM,int left, int right)
+// void sukunaRes::selectSort(vector<nodeSukuna*> &IDdelete,int NUM,int left, int right)
+// {
+// 	if(NUM==0||left>=vectorSukuna.size())return ;
+// 	else{
+// 		if(right>=vectorSukuna.size()){
+// 			NUM--;
+// 			IDdelete.push_back(vectorSukuna[left]);
+// 			selectSort(IDdelete,NUM,2*left+1,2*left+2);
+// 		}
+// 		else if(compare(vectorSukuna[left],vectorSukuna[right])){
+// 			NUM--;
+// 			IDdelete.push_back(vectorSukuna[left]);
+// 			if(compare(vectorSukuna[2*left+1],vectorSukuna[2*left+2])){
+// 				selectSort(IDdelete,NUM,2*left+1,right);
+// 			}
+// 			else{
+// 				selectSort(IDdelete,NUM,2*left+2,right);
+// 			}
+// 		}
+// 		else{
+// 			NUM--;
+// 			IDdelete.push_back(vectorSukuna[right]);
+// 			if(compare(vectorSukuna[2*right+1],vectorSukuna[2*right+2])){
+// 				selectSort(IDdelete,NUM,left,2*right+2);
+// 			}
+// 			else{
+// 				selectSort(IDdelete,NUM,left,2*right+1);
+// 			}
+// 		}
+// 	}
+// }
+
+
+sukunaRes::~sukunaRes()
 {
-	if(NUM==0||left>=vectorSukuna.size())return ;
-	else{
-		if(right>=vectorSukuna.size()){
-			NUM--;
-			IDdelete.push_back(vectorSukuna[left]);
-			selectSort(IDdelete,NUM,2*left+1,2*left+2);
-		}
-		else if(compare(vectorSukuna[left],vectorSukuna[right])){
-			NUM--;
-			IDdelete.push_back(vectorSukuna[left]);
-			if(compare(vectorSukuna[2*left+1],vectorSukuna[2*left+2])){
-				selectSort(IDdelete,NUM,2*left+1,right);
-			}
-			else{
-				selectSort(IDdelete,NUM,2*left+2,right);
-			}
-		}
-		else{
-			NUM--;
-			IDdelete.push_back(vectorSukuna[right]);
-			if(compare(vectorSukuna[2*right+1],vectorSukuna[2*right+2])){
-				selectSort(IDdelete,NUM,left,2*right+2);
-			}
-			else{
-				selectSort(IDdelete,NUM,left,2*right+1);
-			}
-		}
+	for(size_t i=0;i<vectorSukuna.size();i++){
+		delete vectorSukuna[i];
 	}
 }
 
 void sukunaRes::printPreorder(int& NUM,int index)
 {	if(NUM<=0)return;
-	if(index>=vectorSukuna.size())return;
-	if(vectorSukuna[index]->count==0)return;
+	if(index>=int(vectorSukuna.size()))return;
+	if(vectorSukuna[index]->rootDeque.size()==0)return;
 	vectorSukuna[index]->printLifo(NUM,vectorSukuna[index]->ID);
 	printPreorder(NUM,index*2+1);
 	printPreorder(NUM,index*2+2);
 }
 
-void sukunaRes::reHeapUp(int index)
+void sukunaRes::reHeapUp(int& index)
 {
 	while(index>0){
+		//  cout<<vectorSukuna[index]->ID<<" "<<vectorSukuna[index]->rootDeque.size()<<endl;
+		//  cout<<vectorSukuna[(index-1)/2]->ID<<" "<<vectorSukuna[(index-1)/2]->rootDeque.size()<<endl;
 		if(compare(vectorSukuna[index],vectorSukuna[(index-1)/2])){
 			swap(vectorSukuna[index],vectorSukuna[(index-1)/2]);
 			index=(index-1)/2;
@@ -778,17 +878,17 @@ void sukunaRes::reHeapUp(int index)
 	}
 }
 
-void sukunaRes::reHeapDown(int index)
+void sukunaRes::reHeapDown(int& index)
 {	//cout<<"reHeapDown\n";
-	while(index<vectorSukuna.size()){
+	while(index<int(vectorSukuna.size())){
 		//cout<<"index"<<index<<endl;
 		int left=2*index+1;
 		int right=2*index+2;
 		//cout<<"left"<<left<<endl;
 		//cout<<"right"<<right<<endl;
-		if(left<vectorSukuna.size()){
+		if(left<int(vectorSukuna.size())){
 			int min=left;
-			if(right<vectorSukuna.size()&&compare(vectorSukuna[right],vectorSukuna[left])){
+			if(right<int(vectorSukuna.size())&&compare(vectorSukuna[right],vectorSukuna[left])){
 				min=right;
 			}
 			if(compare(vectorSukuna[min],vectorSukuna[index])){
@@ -813,17 +913,17 @@ void sukunaRes::heapify()
 }
 
 bool sukunaRes::compare(nodeSukuna *node1, nodeSukuna *node2){
-			if(node1->count==node2->count){
-				for(int i=0;i<LRU.size();i++){
-					if(LRU[i]==node1->ID){
+			if(node1->rootDeque.size()==node2->rootDeque.size()){
+				for(size_t i=0;i<this->LRU.size();i++){
+					if(this->LRU[i]==node1->ID){
 						return true; /*Node1 <Node2*/
 					}
-					if(LRU[i]==node2->ID){
+					if(this->LRU[i]==node2->ID){
 						return false; /*Node1 >Node2*/
 					}
 				}
 			}
-			return node1->count<node2->count;
+			return node1->rootDeque.size()<node2->rootDeque.size();
 }
 
 /*---------------------------------------------*/
@@ -835,6 +935,9 @@ struct nodeGojo{
 	queue<Customer*> listCustomer;
 	nodeGojo(){
 		rootBST=new BinarySearchTree();
+	}
+	~nodeGojo(){
+		delete rootBST;
 	}
 };
 
@@ -891,11 +994,17 @@ class gojoRes
 					temp->listCustomer.pop();
 					//cout<<deletcus->result<<endl;
 					temp->rootBST->deleteNode(deletcus);
+					delete deletcus;
 					temp->count--;
 				}
 			}
 		}
-		~gojoRes();
+		~gojoRes(){
+			for(int i=1;i<=MAXSIZE;i++){
+				nodeGojo* temp=hashMap.find(i)->second;
+				delete temp;
+			}
+		}
 };
 		
 class restaurant
@@ -922,7 +1031,10 @@ class restaurant
 	void HAND();
 	void LIMITLESS(int NUM);
 	void CLEAVE(int NUM);
-	~restaurant();
+	~restaurant(){
+		delete GOJO;
+		delete SUKUNA;
+	}
 };
 
 
@@ -930,14 +1042,22 @@ class restaurant
 
 /*SUKUNA*/
 void restaurant::LAPSE(string NAME){
-
+	
+	this->news="";
 	Customer* A=new Customer();
 	A->name=NAME;
-
+	//A->name=NAME;
+	string NAME2=NAME;
+	vector<pair<char,int>> saving;
 	unordered_map<char,int> map;
-	string temp= sortFrequent(A, map);
+	//string temp= sortFrequent(A, map);
+	string temp= sortFrequent2(A, map, saving);
 		// cout<<temp<<endl;
-	if(temp=="false") return ;
+	if(temp=="false"){ 
+		delete A;
+		map.clear();
+		return ;
+	}
 		/*tao danh sach X*/
 	for(size_t i=0;i<temp.length();i++){
 		int s=map[NAME[i]];
@@ -954,12 +1074,13 @@ void restaurant::LAPSE(string NAME){
 		// cout<<NAME<<endl;
 	A->name=NAME;
 	map.clear();
-	temp= sortFrequent(A,map);
+	//temp= sortFrequent(A,map);
+	temp=sortFrequent2(A,map,saving);
 		// cout<<temp<<endl;
 	/*BUILD TREE*/
      vector<pair<char, pair<int, int>>> list;
 	int i=0;
-	for(auto x: A->saving){
+	for(auto x: saving){
 		list.push_back({x.first,{x.second,i}});
 		i++;
 	}
@@ -968,12 +1089,15 @@ void restaurant::LAPSE(string NAME){
 		// 	cout<<x.first<<" "<<x.second.first<<" "<<x.second.second<<endl;
 		// }
 	Hufftree* treetemp= new Hufftree(list,i);
-	treetemp->setCode(treetemp->getRoot(),"",A->code);
-	A->result=A->convertBinarytoDecimal(A->convertName(A));
+	
+	unordered_map<char,string> code;
+	treetemp->setCode(treetemp->getRoot(),"",code);
+
+	A->result=A->convertBinarytoDecimal(A->convertName(A,code));
 	//A->tree->displayTreeVertical(A->tree->getRoot(),0);
 	//cout<<A->result<<endl;
 
-	int ID=A->result%MAXSIZE+1;
+	//int ID=A->result%MAXSIZE+1;
 	if(A->result%2!=0){
 		//cout<<"GOJO\n";
 		GOJO->insert(A);
@@ -983,12 +1107,15 @@ void restaurant::LAPSE(string NAME){
 		SUKUNA->insert(A);
 	}
 	map.clear();
-	A->code.clear();
-	A->saving.clear();
+	code.clear();
+	saving.clear();
+	// A->code.clear();
+	// A->saving.clear();
+	list.clear();
+
 	//cout<<A->result<<endl;
 	//treetemp->displayTreeVertical(treetemp->getRoot(),0);
 	//set news here
-	this->news="";
 	treetemp->getNewsInorder(treetemp->getRoot(),news);
 	delete treetemp;
 }
@@ -1007,6 +1134,7 @@ void restaurant::KEITEIKEN(int NUM){
 
 /*DONE*/
 void restaurant::CLEAVE(int NUM){
+	//SUKUNA->printTreeMinHeap(0);
 	SUKUNA->printPreorder(NUM,0);
 }
 
