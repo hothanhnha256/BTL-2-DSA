@@ -63,37 +63,17 @@ public:
 		root=nullptr;
 	}
 	
-	HuffNode*rotateLeft(HuffNode* a){
+	HuffNode*LeftRotate(HuffNode* a){
 		HuffNode* b=a->right;
 		a->right=b->left;
 		b->left=a;
-		// if(a->left!=nullptr&&a->right!=nullptr){
-		// 	a->freq=a->left->freq+a->right->freq;
-		// }
-		// else if(a->left==nullptr&&a->right!=nullptr){
-		// 	a->freq=a->right->freq;
-		// }
-		// else if(a->left!=nullptr&&a->right==nullptr){
-		// 	a->freq=a->left->freq;
-		// }
-		// b->freq=b->left->freq+b->right->freq;
 		return b;
 	}
 
-	HuffNode*rotateRight(HuffNode* a){
+	HuffNode*RightRotate(HuffNode* a){
 		HuffNode* b=a->left;
 		a->left=b->right;
 		b->right=a;
-		// if(a->left!=nullptr&&a->right!=nullptr){
-		// 	a->freq=a->left->freq+a->right->freq;
-		// }
-		// else if(a->left==nullptr&&a->right!=nullptr){
-		// 	a->freq=a->right->freq;
-		// }
-		// else if(a->left!=nullptr&&a->right==nullptr){
-		// 	a->freq=a->left->freq;
-		// }
-		// b->freq=b->left->freq+b->right->freq;
 		return b;
 	}
 	
@@ -102,58 +82,75 @@ public:
 		return 1+max(getHeightRec(node->left),getHeightRec(node->right));
 	}
 
-	int getBalance(HuffNode *subroot)
+	int getBalance(HuffNode *temp)
     {
-        if (!subroot)
+        if (!temp)
             return 0;
-        return getHeightRec(subroot->left) - getHeightRec(subroot->right);
+        return getHeightRec(temp->left) - getHeightRec(temp->right);
     }
     
-	HuffNode* Rotate(HuffNode*temp, int index){
-		//std::cout<<"Rotate\n";
-		if(index>0){
-			int l=getHeightRec(temp->left);
-			int r=getHeightRec(temp->right);
-			if(l-r>=2){
-				if(temp->left->bf==1)temp->left=rotateLeft(temp->left);
-				temp=rotateRight(temp);
-				temp->bf=0;
-				index--;
-				if(index==0)return temp;
-				temp->left=Rotate(temp->left,index);
-				//if(index==0)return temp;
-				temp->right=Rotate(temp->right,index);
-				/*Preorder*/
+	bool FullNode(HuffNode* root){
+		if (root == nullptr) return true;
+		if (root->left == nullptr && root->right == nullptr) return true;
+		if ((root->left) && (root->right)) return (FullNode(root->left) && FullNode(root->right));
+		return false;
+	};
 
-				l=getHeightRec(temp->left);
-				r=getHeightRec(temp->right);
-				
-				if(l-r==1)temp->bf=-1;
-				else if(l-r==-1)temp->bf=1;
-				else temp->bf=0;
-				return temp;
+	void Rotate(HuffNode*& temp, int& index) {
+		if (temp == nullptr || index == 0) return;
+
+		int balance = getHeightRec(temp->right) - getHeightRec(temp->left);
+
+		if (balance >=2 ) {
+			while (balance >= 2 && index != 0) {
+				int RightB = getHeightRec(temp->right->right) - getHeightRec(temp->right->left);
+				if (RightB <= -1) {
+					temp->right = RightRotate(temp->right);
+					temp = LeftRotate(temp);
+					index--;
+					Rotate(temp, index);
+				}
+				else if (RightB >= 1) {
+					temp = LeftRotate(temp);
+					index--;
+					Rotate(temp, index);
+				}
+				else if (FullNode(temp->right) && RightB == 0) {
+					temp = LeftRotate(temp);
+					index--;
+					Rotate(temp, index);
+					break;
+				}
+				balance = getHeightRec(temp->right) - getHeightRec(temp->left);
 			}
-			else if(l-r<=-2){
-				if(temp->right->bf==-1)temp->right=rotateRight(temp->right);
-				temp=rotateLeft(temp);
-				temp->bf=0;
-				index--;
-				if(index==0)return temp;
-				temp->left=Rotate(temp->left,index);
-				temp->right=Rotate(temp->right,index);
-				l=getHeightRec(temp->left);
-				r=getHeightRec(temp->right);
-				if(l-r==1)temp->bf=-1;
-				else if(l-r==-1)temp->bf=1;
-				else temp->bf=0;
-				return temp;
-			}
-			else if(l-r==1)temp->bf=-1;
-			else if(l-r==-1)temp->bf=1;
-			else temp->bf=0;
 		}
-		return temp;
-	}
+		else if (balance <= -2 && index != 0) {
+			while (balance <= -2 && index != 0) {
+				int LeftB = getHeightRec(temp->left->right) - getHeightRec(temp->left->left);
+				if (LeftB >= 1) {
+					temp->left = LeftRotate(temp->left);
+					temp = RightRotate(temp);
+					index--;
+					Rotate(temp, index);
+				}
+				else if (LeftB <= -1) {
+					temp = RightRotate(temp);
+					index--;
+					Rotate(temp, index);
+				}
+				else if (FullNode(temp->left) && LeftB == 0) {
+					temp = RightRotate(temp);
+					index--;
+					Rotate(temp, index);
+					break;
+				}
+				balance = getHeightRec(temp->right) - getHeightRec(temp->left);
+			}
+		}
+		Rotate(temp->left, index);
+		Rotate(temp->right, index);
+	};
+	
 	
 	class compare1{
 			public:
@@ -189,7 +186,8 @@ public:
 			//std::cout<<"left"<<left.second->data<<" "<<left.second->freq<<" \n right"<<right.second->data<<" "<<right.second->freq<<endl;
 			/*Tạo 1 thằng mới có freq là tổng 2 thằng trên và chứa 2 thằng trên*/	
 			HuffNode* temp=new HuffNode(left.second,right.second);
-			temp=Rotate(temp,3);
+			int abc=3;
+			Rotate(temp,abc);
 			/*push vào lại Queue*/
 			dequeCompare.push({i,temp});
 			//printMinheap(dequeCompare);
@@ -254,29 +252,7 @@ public:
 		std::cout << node->freq << "-" <<node->code<< endl;
 
 		displayTreeVertical(node->left, indent + 4);
-	}
-	
-	string printTree(){
-		string res="";
-		if(root==nullptr){
-			return res;
-		}
-		queue<HuffNode*> q;
-		q.push(root);
-		while(!q.empty()){
-			HuffNode* temp=q.front();
-			q.pop();
-			if(temp->isLeaf){
-				res+=temp->data+"-"+to_string(temp->freq)+'\n';
-			}
-			else{
-				q.push(temp->left);
-				q.push(temp->right);
-			}
-		}
-		return res;
-	}
-	
+	}	
 	void detructor(HuffNode* node){
 		if(node==nullptr)return;
 		detructor(node->left);
@@ -294,8 +270,6 @@ struct Customer
 {
 	string name;
 	int result;
-	// vector<pair<char,int>> saving;
-	// unordered_map<char,string> code;
 	Customer(){
 	}
 	void printCustomer(){
@@ -312,9 +286,7 @@ struct Customer
 		return res;
 	}
 	int convertBinarytoDecimal(string binary){
-		//std::cout<<binary<<endl;
 		reverse(binary.begin(),binary.end());
-		//std::cout<<binary<<endl;
 		int decimal=0;
 		int n=binary.length();
 		if(n>10){
@@ -328,13 +300,8 @@ struct Customer
 				decimal=decimal*2;
 			}
 		}
-		//std::cout<<decimal<<endl;
 		return decimal;
 	}
-	// ~Customer(){
-	// 	saving.clear();
-	// 	code.clear();
-	// }	
 };
 /*DONE SORT*/
 bool compare(pair<char, int>& a, pair<char, int>& b) {
@@ -351,35 +318,6 @@ bool compare(pair<char, int>& a, pair<char, int>& b) {
    		return a.first > b.first;
 	}
 }
-
-// string sortFrequent(Customer *A, unordered_map<char,int>& map){
-// 	string E=A->name;
-// 	for(int i=E.length()-1;i>=0;i--){
-// 		char c=E[i];
-// 		map[c]++;
-// 	}
-
-// 	vector<pair<char,int>> temp;
-
-// 	for( auto x: map){
-// 		temp.push_back({x.first,x.second});
-// 	}
-	
-// 	sort(temp.begin(),temp.end(),compare);
-	
-// 	string temp2="";
-    
-// 	for (auto x : temp) {
-//         for (int i = 0; i < x.second; i++) {
-//             temp2 += x.first;
-//         }
-//     }
-// 	A->saving.clear();
-// 	A->saving=temp;
-// 	temp.clear();
-// 	if(map.size()<3)return "false";
-// 	return temp2;
-// }
 
 string sortFrequent2(Customer*A,unordered_map<char,int>& map, vector<pair<char,int>>& saving){
 	string E=A->name;
@@ -424,7 +362,6 @@ int nCr(int fact[], int Num, int R)
     if (R > Num)
         return 0;
  
-    // nCr= fact(n)/(fact(r)*fact(n-r))
     int res = fact[Num] / fact[R];
     res /= fact[Num - R];
  
@@ -456,9 +393,8 @@ int countWays(vector<int>& arr, int fact[])
         }
     }
  
-    size_t N1 = left.size();
+    size_t N = left.size();
  
-    //size_t N2 = right.size();
  
     int countLeft
         = countWays(left,
@@ -467,7 +403,7 @@ int countWays(vector<int>& arr, int fact[])
         = countWays(right,
                     fact);
  
-    return nCr(fact, Num - 1, N1)* countLeft * countRight;
+    return nCr(fact, Num - 1, N)* countLeft * countRight;
 }
 
 class BinarySearchTree
@@ -526,7 +462,6 @@ public:
 	}
     /*delete*/
     Node* deleteHelp (Node*root,Customer* value){
-		//std::cout<<"deleteHelp\n";
     if(root==nullptr)return nullptr;
     if(value->result<root->value->result){
         root->pLeft= deleteHelp(root->pLeft,value);
@@ -590,8 +525,6 @@ public:
     /*postOrder&Hoanvi-KOSUKEN*/
     void postOrderhelp(Node* root,vector<int>&A) {
         if (root != nullptr) {
-            
-
             postOrderhelp(root->pLeft,A);
             postOrderhelp(root->pRight,A);
             A.push_back(root->value->result);
@@ -618,8 +551,7 @@ public:
         Node* pLeft, * pRight;
         friend class BinarySearchTree;
     public:
-        Node(Customer* value) : value(value), pLeft(NULL), pRight(NULL) {}
-		
+        Node(Customer* value) : value(value), pLeft(NULL), pRight(NULL) {}	
     };
 };
 
@@ -628,7 +560,6 @@ public:
 /*SUKUNA*/
 /*Node Sukuna*/
 struct nodeSukuna{
-    //int count=0;
 	int ID;
 	nodeSukuna* left=nullptr;
 	nodeSukuna* right=nullptr;
@@ -694,26 +625,7 @@ class sukunaRes
 		void heapify();
 		bool compare(nodeSukuna* node1,nodeSukuna* node2);
 		void selectSort(vector<nodeSukuna*> &IDdelete,int NUM,int left, int right);
-		void printTreeMinHeap(int index, int indent = 0) {
-			if (index < int(vectorSukuna.size())) {
-				printTreeMinHeap(2 * index + 2, indent + 4);  // right child
 
-				if (indent) {
-					std::cout << std::setw(indent) << ' ';
-				}
-
-				if (2 * index + 2 < int(vectorSukuna.size())) {
-					std::cout << "/\n" << std::setw(indent) << ' ';
-				}
-
-				std::cout << vectorSukuna[index]->ID << "-" << vectorSukuna[index]->rootDeque.size() << "\n ";
-
-				if (2 * index + 1 <int( vectorSukuna.size())) {
-					std::cout << std::setw(indent) << ' ' << "\\\n";
-					printTreeMinHeap(2 * index + 1, indent + 4);  // left child
-				}
-			}
-		}
 		~sukunaRes();
 };
 
@@ -820,39 +732,6 @@ void sukunaRes::sukunaDelete(int NUM)
 	IDdelete.clear();
 }
 
-// void sukunaRes::selectSort(vector<nodeSukuna*> &IDdelete,int NUM,int left, int right)
-// {
-// 	if(NUM==0||left>=vectorSukuna.size())return ;
-// 	else{
-// 		if(right>=vectorSukuna.size()){
-// 			NUM--;
-// 			IDdelete.push_back(vectorSukuna[left]);
-// 			selectSort(IDdelete,NUM,2*left+1,2*left+2);
-// 		}
-// 		else if(compare(vectorSukuna[left],vectorSukuna[right])){
-// 			NUM--;
-// 			IDdelete.push_back(vectorSukuna[left]);
-// 			if(compare(vectorSukuna[2*left+1],vectorSukuna[2*left+2])){
-// 				selectSort(IDdelete,NUM,2*left+1,right);
-// 			}
-// 			else{
-// 				selectSort(IDdelete,NUM,2*left+2,right);
-// 			}
-// 		}
-// 		else{
-// 			NUM--;
-// 			IDdelete.push_back(vectorSukuna[right]);
-// 			if(compare(vectorSukuna[2*right+1],vectorSukuna[2*right+2])){
-// 				selectSort(IDdelete,NUM,left,2*right+2);
-// 			}
-// 			else{
-// 				selectSort(IDdelete,NUM,left,2*right+1);
-// 			}
-// 		}
-// 	}
-// }
-
-
 sukunaRes::~sukunaRes()
 {
 	for(size_t i=0;i<vectorSukuna.size();i++){
@@ -872,8 +751,6 @@ void sukunaRes::printPreorder(int& NUM,int index)
 void sukunaRes::reHeapUp(int& index)
 {
 	while(index>0){
-		//  std::cout<<vectorSukuna[index]->ID<<" "<<vectorSukuna[index]->rootDeque.size()<<endl;
-		//  std::cout<<vectorSukuna[(index-1)/2]->ID<<" "<<vectorSukuna[(index-1)/2]->rootDeque.size()<<endl;
 		if(compare(vectorSukuna[index],vectorSukuna[(index-1)/2])){
 			swap(vectorSukuna[index],vectorSukuna[(index-1)/2]);
 			index=(index-1)/2;
@@ -885,13 +762,10 @@ void sukunaRes::reHeapUp(int& index)
 }
 
 void sukunaRes::reHeapDown(int& index)
-{	//std::cout<<"reHeapDown\n";
+{	
 	while(index<int(vectorSukuna.size())){
-		//std::cout<<"index"<<index<<endl;
 		int left=2*index+1;
 		int right=2*index+2;
-		//std::cout<<"left"<<left<<endl;
-		//std::cout<<"right"<<right<<endl;
 		if(left<int(vectorSukuna.size())){
 			int min=left;
 			if(right<int(vectorSukuna.size())&&compare(vectorSukuna[right],vectorSukuna[left])){
@@ -963,11 +837,8 @@ class gojoRes
 		void insert(Customer* demo){
 			int ID=demo->result%MAXSIZE+1;
 			nodeGojo* temp= hashMap.find(ID)->second;
-			//std::cout<<ID<<endl;	
 			temp->rootBST->add(demo);
-			//std::cout<<"BST\n";
 			temp->listCustomer.push(demo);
-			//std::cout<<"Queue\n";
 			temp->count++;
 		}
 		void printInorder(int NUM){
@@ -977,20 +848,13 @@ class gojoRes
 		}
 
 		void deletePostorder(){
-			//std::cout<<"delete\n";
 			for(int i=1;i<=MAXSIZE;i++){
-				//std::cout<<i<<endl;
 				nodeGojo* temp=hashMap.find(i)->second;
 				if(temp->count==0){
-					//std::cout<<"nodelete\n";
 					continue;
 				}
 
-				//std::cout<<"candelete\n";
 				int Y=temp->rootBST->caculatePermutation()%MAXSIZE;
-				//std::cout<<Y<<endl;
-				//std::cout<<"caculate\n";	
-				/*Tien hanh xoa CustomerNode-FIFO*/
 				if(Y>temp->count){
 					Y=temp->count;
 				}
@@ -998,7 +862,6 @@ class gojoRes
 					if(temp->listCustomer.empty())break;
 					Customer*deletcus=temp->listCustomer.front();
 					temp->listCustomer.pop();
-					//std::cout<<deletcus->result<<endl;
 					temp->rootBST->deleteNode(deletcus);
 					delete deletcus;
 					temp->count--;
@@ -1052,11 +915,9 @@ void restaurant::LAPSE(string NAME){
 	this->news="";
 	Customer* A=new Customer();
 	A->name=NAME;
-	//A->name=NAME;
 	string NAME2=NAME;
 	vector<pair<char,int>> saving;
 	unordered_map<char,int> map;
-	//string temp= sortFrequent(A, map);
 	string temp= sortFrequent2(A, map, saving);
 		// std::cout<<temp<<endl;
 	if(temp=="false"){ 
@@ -1077,12 +938,9 @@ void restaurant::LAPSE(string NAME){
 			NAME[i]+=s;
 		}
 	}
-		// std::cout<<NAME<<endl;
 	A->name=NAME;
 	map.clear();
-	//temp= sortFrequent(A,map);
 	temp=sortFrequent2(A,map,saving);
-		// std::cout<<temp<<endl;
 	/*BUILD TREE*/
      vector<pair<char, pair<int, int>>> list;
 	int i=0;
@@ -1090,38 +948,25 @@ void restaurant::LAPSE(string NAME){
 		list.push_back({x.first,{x.second,i}});
 		i++;
 	}
-
-		// for(auto x: list){
-		// 	std::cout<<x.first<<" "<<x.second.first<<" "<<x.second.second<<endl;
-		// }
 	Hufftree* treetemp= new Hufftree(list,i);
 	
 	unordered_map<char,string> code;
 	treetemp->setCode(treetemp->getRoot(),"",code);
 
 	A->result=A->convertBinarytoDecimal(A->convertName(A,code));
-	//A->tree->displayTreeVertical(A->tree->getRoot(),0);
-	//std::cout<<A->result<<endl;
-
-	//int ID=A->result%MAXSIZE+1;
 	if(A->result%2!=0){
-		//std::cout<<"GOJO\n";
 		GOJO->insert(A);
 	}
 	else{
-		//std::cout<<"SUKUNA\n";
 		SUKUNA->insert(A);
 	}
 	map.clear();
 	code.clear();
 	saving.clear();
-	// A->code.clear();
-	// A->saving.clear();
 	list.clear();
 
 	//std::cout<<A->result<<endl;
 	//treetemp->displayTreeVertical(treetemp->getRoot(),0);
-	//set news here
 	treetemp->getNewsInorder(treetemp->getRoot(),news);
 	delete treetemp;
 }
@@ -1140,7 +985,6 @@ void restaurant::KEITEIKEN(int NUM){
 
 /*DONE*/
 void restaurant::CLEAVE(int NUM){
-	//SUKUNA->printTreeMinHeap(0);
 	SUKUNA->printPreorder(NUM,0);
 }
 
@@ -1163,22 +1007,22 @@ void simulate(string filename)
 	restaurant * run=new restaurant();
 	int i=1;
 	while(ss >> str)
-	{   //std::cout<<"Buoc thu "<<i<<endl;
+	{   
 		if(str == "MAXSIZE")
 		{
 			ss>> maxsize;
 			run->setMAXSIZE(stoi(maxsize));
     	}
-        else if(str == "LAPSE") // RED <NAME> <ENERGY>
+        else if(str == "LAPSE") 
         {
             ss>> name;
 			run->LAPSE(name);
     	}
-		else if(str == "HAND") // RED <NAME> <ENERGY>
+		else if(str == "HAND")
         {
             run->HAND();
     	}
-    	else if(str == "KEITEIKEN") // RED <NAME> <ENERGY>
+    	else if(str == "KEITEIKEN") 
         {
             ss>> num;
 			run->KEITEIKEN(stoi(num));
