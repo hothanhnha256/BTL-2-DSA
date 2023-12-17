@@ -416,7 +416,6 @@ public:
     
     void deleteNode(Customer* value){
         if(root!=nullptr){
-			//std::cout<<value->result<<endl;
             root=deleteHelp(root,value);
 			count--;
         }
@@ -480,7 +479,6 @@ public:
 	}
     long long  caculatePermutation(){
         vector<int> A;
-		//std::cout<<"A\n";
         convertPostorder(A);
 		vector<int> A1;
 		int len = A.size();
@@ -493,6 +491,7 @@ public:
 		A.clear();
 		return result;
     }
+	
 
     class Node  
     {
@@ -537,7 +536,6 @@ void nodeSukuna::printLifo(int NUM,int ID){
 nodeSukuna *nodeSukuna::insert(Customer *customerAdd)
 {	
     
-	//this->count++;
 	rootDeque.push_back(customerAdd);
 	return this;
 }
@@ -545,7 +543,6 @@ nodeSukuna *nodeSukuna::insert(Customer *customerAdd)
 void nodeSukuna::remove()
 {	Customer* temp=rootDeque.front();
 	std::cout<<rootDeque.front()->result<<"-"<<ID<<endl;
-	//count--;
 	rootDeque.pop_front();
 	delete temp;
 }
@@ -792,7 +789,6 @@ class gojoRes
 				if(Y>int(temp->listCustomer.size())){
 					Y=int(temp->listCustomer.size());
 				}
-				// cout<<"Permutation"<<Y<<endl;
 				for(int i=0;i<Y;i++){
 					if(temp->listCustomer.empty())break;
 					Customer*deletcus=temp->listCustomer.front();
@@ -884,7 +880,7 @@ void restaurant::LAPSE(string NAME){
 	unordered_map<char,string> code;
 	treetemp->setCode(treetemp->getRoot(),"",code);
 	A->result=A->convertBinarytoDecimal(A->convertName(A,code));
-	//cout<<"ID"<<A->result%MAXSIZE+1<<endl;
+	
 	if(A->result%2!=0){
 		GOJO->insert(A);
 	}
@@ -897,7 +893,6 @@ void restaurant::LAPSE(string NAME){
 	saving.clear();
 	list.clear();
 	this->news="";
-	//treetemp->displayTreeVertical(treetemp->getRoot(),0);
 	treetemp->getNewsInorder(treetemp->getRoot(),news);
 	delete treetemp;
 }
@@ -928,9 +923,8 @@ void simulate(string filename)
 	ifstream ss(filename);
 	string str, maxsize, name, num;
 	restaurant * run=new restaurant();
-	//int i=0;
 	while(ss >> str)
-	{   //cout<<"Step "<<i++<<": "<<str<<endl;
+	{   
 		if(str == "MAXSIZE")
 		{
 			ss>> maxsize;
