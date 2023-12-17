@@ -39,7 +39,6 @@ public:
 };
 void HuffNode:: printTree()
 {  
-
 	std::cout << this->data << " " << this->freq << endl;
 
 	if (this->isLeaf) {
@@ -51,7 +50,6 @@ void HuffNode:: printTree()
 void HuffNode::printNode()
 { 
 	std::cout<<this->data<<" "<<this->freq<<endl;
-
 }
 
 class Hufftree
@@ -62,40 +60,34 @@ public:
  	Hufftree(){
 		root=nullptr;
 	}
-	
 	HuffNode*LeftRotate(HuffNode* a){
 		HuffNode* b=a->right;
 		a->right=b->left;
 		b->left=a;
 		return b;
 	}
-
 	HuffNode*RightRotate(HuffNode* a){
 		HuffNode* b=a->left;
 		a->left=b->right;
 		b->right=a;
 		return b;
 	}
-	
 	int getHeightRec(HuffNode* node){
 		if(node==nullptr)return 0;
 		return 1+max(getHeightRec(node->left),getHeightRec(node->right));
 	}
-
 	int getBalance(HuffNode *temp)
     {
         if (!temp)
             return 0;
         return getHeightRec(temp->left) - getHeightRec(temp->right);
     }
-    
 	bool FullNode(HuffNode* root){
 		if (root == nullptr) return true;
 		if (root->left == nullptr && root->right == nullptr) return true;
 		if ((root->left) && (root->right)) return (FullNode(root->left) && FullNode(root->right));
 		return false;
 	};
-
 	void Rotate(HuffNode*& temp, int& index) {
 		if (temp == nullptr || index == 0) return;
 
@@ -150,8 +142,6 @@ public:
 		Rotate(temp->left, index);
 		Rotate(temp->right, index);
 	};
-	
-	
 	class compare1{
 			public:
 			bool operator()(pair<int,HuffNode*> a,pair<int,HuffNode*> b){
@@ -162,58 +152,40 @@ public:
 					return a.second->freq>b.second->freq;
 				}
 			}
-		};
+	};
 	
-
 	Hufftree (vector<pair<char, pair<int, int>>> &list,int i){
 		priority_queue<pair<int,HuffNode*>,vector<pair<int,HuffNode*>>,compare1> dequeCompare;
-
 		//std::cout<<"Build Tree\n";
 		for(auto x: list){
-			//std::cout<<x.first<<" "<<x.second.first<<" "<<x.second.second<<endl;
 			HuffNode* temp=new HuffNode(x.first,x.second.first);
 			dequeCompare.push({x.second.second,temp});
 		}	
-
-		//std::cout<<"insert tree\n";
 		while(dequeCompare.size()!=1){
-			//std::cout<<"OK\n";
-			/*Lôi 2 thằng ở đầu ra merge*/
 			pair<int,HuffNode*> left=dequeCompare.top(); 
 			dequeCompare.pop();
 			pair<int,HuffNode*> right=dequeCompare.top();
 			dequeCompare.pop();
-			//std::cout<<"left"<<left.second->data<<" "<<left.second->freq<<" \n right"<<right.second->data<<" "<<right.second->freq<<endl;
-			/*Tạo 1 thằng mới có freq là tổng 2 thằng trên và chứa 2 thằng trên*/	
 			HuffNode* temp=new HuffNode(left.second,right.second);
 			int abc=3;
 			Rotate(temp,abc);
-			/*push vào lại Queue*/
 			dequeCompare.push({i,temp});
-			//printMinheap(dequeCompare);
-			//displayTreeVertical(temp,0);
 			i++;
-			//std::cout<<"-------------------\n";
 		}	
-		/*set lại root*/
+		/*set root*/
 		root=dequeCompare.top().second;
 		dequeCompare.pop();
-		//delete &dequeCompare;
     }
-	
 	void printMinheap(priority_queue<pair<int,HuffNode*>,vector<pair<int,HuffNode*>>,compare1> minHeap){
-		//std::cout<<"print minheap\n";
 		while(!minHeap.empty()){
 			pair<int,HuffNode*> temp=minHeap.top();
 			minHeap.pop();
 			std::cout<<temp.second->data<<" "<<temp.second->freq<<endl;
 		}
 	}
-	
 	HuffNode* getRoot(){
 		return root;
 	}
-
 	void getNewsInorder(HuffNode*root,string &news){
 		if(root==nullptr)return;
 		getNewsInorder(root->left,news);
@@ -227,7 +199,6 @@ public:
 		}
 		getNewsInorder(root->right,news);
 	}
-	
 	void setCode(HuffNode* node,string codesave,unordered_map<char,string>& namecode){
 		if(node==nullptr)return;
 		node->code=codesave;
@@ -238,7 +209,6 @@ public:
 		setCode(node->left,codesave+"0",namecode);
 		setCode(node->right,codesave+"1",namecode);
 	}
-	
 	void displayTreeVertical(HuffNode *node, int indent) const
 	{
 		if (node == nullptr)
@@ -259,12 +229,10 @@ public:
 		detructor(node->right);
 		delete node;
 	}
-	
 	~Hufftree(){
 		detructor(root);
 	}
 };
-
 
 struct Customer
 {
@@ -280,7 +248,6 @@ struct Customer
 		string name=A->name;
 		for(size_t i=0;i<name.length();i++){
 			char c=name[i];
-			//std::cout<<c<<" "<<code[c]<<endl;
 			res+=code[c];
 		}
 		return res;
@@ -346,65 +313,9 @@ string sortFrequent2(Customer*A,unordered_map<char,int>& map, vector<pair<char,i
 	if(map.size()<3)return "false";
 	return temp2;
 }
-/*---------------------------------------------*/
 
 /*BINARY TREE*/
-void calculateFact(int fact[], int Num)
-{
-    fact[0] = 1;
-    for (long long int i = 1; i < Num; i++) {
-        fact[i] = fact[i - 1] * i;
-    }
-}
- 
-int nCr(int fact[], int Num, int R)
-{
-    if (R > Num)
-        return 0;
- 
-    int res = fact[Num] / fact[R];
-    res /= fact[Num - R];
- 
-    return res;
-}
- 
-int countWays(vector<int>& arr, int fact[])
-{
-    int Num = arr.size();
- 
-    if (Num <= 2) {
-        return 1;
-    }
- 
-    vector<int> left;
-    vector<int> right;
- 
-    int root = arr[0];
- 
-    for (int i = 1; i < Num; i++) {
- 
-        if (arr[i] < root) {
-            left.push_back(
-                arr[i]);
-        }
-        else {
-            right.push_back(
-                arr[i]);
-        }
-    }
- 
-    size_t N = left.size();
- 
- 
-    int countLeft
-        = countWays(left,
-                    fact);
-    int countRight
-        = countWays(right,
-                    fact);
- 
-    return nCr(fact, Num - 1, N)* countLeft * countRight;
-}
+
 
 class BinarySearchTree
 {
@@ -414,9 +325,11 @@ private:
     Node* root;
 	int count=0;
 public:
+	vector<vector<long long>> pascal;
     BinarySearchTree() : root(nullptr) {}
     ~BinarySearchTree()
     {	clearTree(root);
+		pascal.clear();
     }
 	void clearTree(Node*root){
 		if(root==nullptr)return;
@@ -431,7 +344,7 @@ public:
         if(root == nullptr){
             root = insert;
         }
-        else if(value->result > root->value->result){
+        else if(value->result >= root->value->result){
             addhelp(root->pRight, value, insert);
         }
         else{
@@ -466,7 +379,7 @@ public:
     if(value->result<root->value->result){
         root->pLeft= deleteHelp(root->pLeft,value);
     }
-    else if(value->result>root->value->result){
+    else if(value->result>=root->value->result&&value!=root->value){
         root->pRight= deleteHelp(root->pRight,value);
     }
     else{
@@ -491,10 +404,11 @@ public:
         }
         //case 2 child
         else{
-			//std::cout<<"case 2 child\n";
+			// //std::cout<<"case 2 child\n";
             Node*temp=findMinimumRight(root->pRight);
             root->value=temp->value;
             root->pRight=deleteMinimum(root->pRight);
+			
         }
     }
     return root;
@@ -508,7 +422,6 @@ public:
         }
     }
     
-	
     /*printInorder*/
     void inOrder(Node* root) {
         if (root != nullptr) {
@@ -533,15 +446,52 @@ public:
     void convertPostorder(vector<int>& A){
         postOrderhelp(root,A);
     }
-    int caculatePermutation(){
+	long long dfs(vector<int> &A)
+	{
+		int lenght = A.size();
+		if (lenght <= 2)
+		return 1;
+		vector<int> left, right;
+		for (int i = 1; i < lenght; i++)
+		{
+			if (A[i] < A[0]){left.push_back(A[i]);}
+			else{right.push_back(A[i]);}
+		}
+		long long l = dfs(left);
+		long long r = dfs(right);
+		int llength = left.size();
+		return (((pascal[lenght - 1][llength] * l)) * r);
+	}
+
+	long long numPer(vector<int> &A)
+	{
+		int n = A.size();
+		pascal.resize(n + 1);
+		for (int i = 0; i < n + 1; i++){
+		pascal[i] = vector<long long>(i + 1, 1);
+			for (int j = 1; j < i; j++){
+				pascal[i][j] = (pascal[i - 1][j - 1] + pascal[i - 1][j]);
+			}
+		}
+		long long ans = dfs(A);
+		for (auto it: pascal){it.clear();}
+		pascal.clear();
+		return ans;
+	}
+    long long  caculatePermutation(){
         vector<int> A;
 		//std::cout<<"A\n";
         convertPostorder(A);
-		//std::cout<<"A\n";
-        int fact[A.size()];
-        calculateFact(fact,A.size());
-		//std::cout<<"fact\n";
-        return countWays(A,fact);
+		vector<int> A1;
+		int len = A.size();
+		for (int i = len - 1; i >= 0; i--){
+			A1.push_back(A[i]);
+			A.pop_back();
+		}
+		long long result= numPer(A1);
+		pascal.clear();
+		A.clear();
+		return result;
     }
 
     class Node  
@@ -554,8 +504,6 @@ public:
         Node(Customer* value) : value(value), pLeft(NULL), pRight(NULL) {}	
     };
 };
-
-/*---------------------------------------------*/
 
 /*SUKUNA*/
 /*Node Sukuna*/
@@ -601,8 +549,6 @@ void nodeSukuna::remove()
 	rootDeque.pop_front();
 	delete temp;
 }
-
-
 
 class sukunaRes
 {
@@ -691,10 +637,7 @@ void sukunaRes::sukunaDelete(int NUM)
 	if(NUM>int(IDdelete.size())){
 		NUM=IDdelete.size();
 	}
-	//std::cout<<"IDdelete\n";
 	for(int i=0;i<NUM;i++){
-		//std::cout<<"STEP"<<i<<endl;
-		//printTreeMinHeap(0);
 
 		for(size_t k=0;k<LRU.size();k++){
 			if(LRU[k]==IDdelete.front()->ID){
@@ -708,27 +651,18 @@ void sukunaRes::sukunaDelete(int NUM)
 			IDdelete.front()->remove();
 			if(IDdelete.front()->rootDeque.size()==0)break;
 		}
-		//std::cout<<"reHeap\n";
 		reHeapUp(index);
 		reHeapDown(index);
-		//std::cout<<"index"<<index<<endl;
 		if(IDdelete.front()->rootDeque.size()==0){
-			//std::cout<<"delete\n";
 			LRU.pop_back();
 			swap(vectorSukuna[index],vectorSukuna[vectorSukuna.size()-1]);
-			
-			//std::cout<<"delete\n";
 			vectorSukuna.pop_back();
-			//std::cout<<"index"<<index<<endl;
-			//std::cout<<"delete\n";
 			reHeapDown(index);
 			nodeSukuna* temp=IDdelete.front();
 			delete temp;
-			//std::cout<<"delete\n";
 		}
 		IDdelete.pop_front();
 	}
-	//std::cout<<"OK\n";	
 	IDdelete.clear();
 }
 
@@ -855,9 +789,10 @@ class gojoRes
 				}
 
 				int Y=temp->rootBST->caculatePermutation()%MAXSIZE;
-				if(Y>temp->count){
-					Y=temp->count;
+				if(Y>int(temp->listCustomer.size())){
+					Y=int(temp->listCustomer.size());
 				}
+				// cout<<"Permutation"<<Y<<endl;
 				for(int i=0;i<Y;i++){
 					if(temp->listCustomer.empty())break;
 					Customer*deletcus=temp->listCustomer.front();
@@ -908,18 +843,14 @@ class restaurant
 
 
 /*BOTH*/
-
-/*SUKUNA*/
 void restaurant::LAPSE(string NAME){
 	
-	this->news="";
 	Customer* A=new Customer();
 	A->name=NAME;
 	string NAME2=NAME;
 	vector<pair<char,int>> saving;
 	unordered_map<char,int> map;
 	string temp= sortFrequent2(A, map, saving);
-		// std::cout<<temp<<endl;
 	if(temp=="false"){ 
 		delete A;
 		map.clear();
@@ -952,44 +883,38 @@ void restaurant::LAPSE(string NAME){
 	
 	unordered_map<char,string> code;
 	treetemp->setCode(treetemp->getRoot(),"",code);
-
 	A->result=A->convertBinarytoDecimal(A->convertName(A,code));
+	//cout<<"ID"<<A->result%MAXSIZE+1<<endl;
 	if(A->result%2!=0){
 		GOJO->insert(A);
 	}
 	else{
 		SUKUNA->insert(A);
 	}
+	
 	map.clear();
 	code.clear();
 	saving.clear();
 	list.clear();
-
-	//std::cout<<A->result<<endl;
+	this->news="";
 	//treetemp->displayTreeVertical(treetemp->getRoot(),0);
 	treetemp->getNewsInorder(treetemp->getRoot(),news);
 	delete treetemp;
 }
-
-/*DONE*/
 void restaurant::HAND(){
 	std::cout<<news;
 }
 
 /*SUKUNA*/
-
 void restaurant::KEITEIKEN(int NUM){
 	if(NUM<=0)return;
 	SUKUNA->sukunaDelete(NUM);
 }
-
-/*DONE*/
 void restaurant::CLEAVE(int NUM){
 	SUKUNA->printPreorder(NUM,0);
 }
 
-
-/*GOJO-DONE*/
+/*GOJO*/
 void restaurant::KOKUSEN(){
 	GOJO->deletePostorder();
 }
@@ -998,16 +923,14 @@ void restaurant::LIMITLESS(int NUM){
 	GOJO->printInorder(NUM);
 }
 
-
-
 void simulate(string filename)
 {
 	ifstream ss(filename);
 	string str, maxsize, name, num;
 	restaurant * run=new restaurant();
-	int i=1;
+	//int i=0;
 	while(ss >> str)
-	{   
+	{   //cout<<"Step "<<i++<<": "<<str<<endl;
 		if(str == "MAXSIZE")
 		{
 			ss>> maxsize;
@@ -1039,9 +962,9 @@ void simulate(string filename)
 			ss>> num;
 			run->LIMITLESS(stoi(num));
 		}
-		i++;
 	}
 	delete run;
 
 	return;
 }
+
