@@ -315,8 +315,6 @@ string sortFrequent2(Customer*A,unordered_map<char,int>& map, vector<pair<char,i
 }
 
 /*BINARY TREE*/
-
-
 class BinarySearchTree
 {
 public:
@@ -738,7 +736,6 @@ bool sukunaRes::compare(nodeSukuna *node1, nodeSukuna *node2){
 }
 
 /*---------------------------------------------*/
-
 struct nodeGojo{
 	/*BST tree root*/ 
 	int count=0;
@@ -836,7 +833,6 @@ class restaurant
 		delete SUKUNA;
 	}
 };
-
 
 /*BOTH*/
 void restaurant::LAPSE(string NAME){
